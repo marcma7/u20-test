@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f4f4f4;
+      text-align: left;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Actions Dashboard</h2>
+
+<div id="status">Carregant...</div>
+
+<table id="table">
+  <thead id="thead"></thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const supabase = createClient(
+  "https://atajqbhztjssgplygarb.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YWpxYmh6dGpzc2dwbHlnYXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxOTg0OTEsImV4cCI6MjA5NDc3NDQ5MX0.8m7Qfh_5s2-4Bg92NXISG_w49myAYnmASOWrUR66I9Q"
+);
+
+function renderTable(data) {
+  const tbody = document.getElementById("tbody");
+  const thead = document.getElementById("thead");
+
+  if (!data || data.length === 0) {
+    tbody.innerHTML = "<tr><td>No data</td></tr>";
+    return;
+  }
+
+  // headers
+  const keys = Object.keys(data[0]);
+  thead.innerHTML = "<tr>" + keys.map(k => `<th>${k}</th>`).join("") + "</tr>";
+
+  // rows
+  tbody.innerHTML = data.map(row => {
+    return "<tr>" + keys.map(k => `<td>${row[k] ?? ""}</td>`).join("") + "</tr>";
+  }).join("");
+}
+
+async function loadData() {
+  document.getElementById("status").innerText = "Actualitzant...";
+
+  const { data, error } = await supabase
+    .from("actions")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    document.getElementById("status").innerText = "Error carregant dades";
+    console.error(error);
+    return;
+  }
+
+  renderTable(data);
+  document.getElementById("status").innerText = "OK (actualitza cada 5s)";
+}
+
+loadData();
+setInterval(loadData, 5000);
+
+</script>
+
+</body>
+</html>
