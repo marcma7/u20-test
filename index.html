@@ -71,23 +71,37 @@ function renderTable(data) {
   }).join("");
 }
 
+function getToday() {
+  const d = new Date();
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 async function loadData() {
   document.getElementById("status").innerText = "Actualitzant...";
 
+  const today = getToday();
+
   const { data, error } = await supabase
     .from("actions")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(50);
+    .select(`
+      *,
+      games!inner(date)
+    `)
+    .ilike("games.date", `${today}%`)
+  .order("id", { ascending: false });
 
   if (error) {
-    document.getElementById("status").innerText = "Error carregant dades";
     console.error(error);
+    document.getElementById("status").innerText = "Error carregant dades";
     return;
   }
 
   renderTable(data);
-  document.getElementById("status").innerText = "OK (actualitza cada 5s)";
+  document.getElementById("status").innerText =
+    `OK - ${data.length} registres`;
 }
 
 loadData();
