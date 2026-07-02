@@ -45,6 +45,15 @@
 <!-- 🔥 SELECTOR EQUIPS -->
 <div id="teamToggles"></div>
 
+<h3>Dades generals</h3>
+
+<div id="generalStats" style="
+display:flex;
+gap:15px;
+margin:15px 0;
+flex-wrap:wrap;
+"></div>
+
 <div id="status">Carregant...</div>
 
 <table id="table">
@@ -83,6 +92,94 @@ function renderTable(data) {
   tbody.innerHTML = data.map(row => {
     return "<tr>" + keys.map(k => `<td>${row[k] ?? ""}</td>`).join("") + "</tr>";
   }).join("");
+}
+
+function renderGeneralStats(data) {
+
+  const total = data.length;
+
+  const generatedAdvantage =
+    data.filter(r => r.generated_advantage).length;
+
+  const noFalta = data.filter(
+    r => r.result !== "FALTA SIN TIROS"
+  );
+
+  const selectedShot =
+    noFalta.filter(r => r.selected_shot).length;
+
+  const shots = data.filter(r =>
+    r.result?.includes("2") || r.result?.includes("3")
+  );
+
+  const points =
+    data.reduce((sum, r) => {
+
+      if (r.result === "2+" || r.result === "2+1")
+        return sum + 2;
+
+      if (r.result === "3+" || r.result === "3+1")
+        return sum + 3;
+
+      return sum;
+
+    }, 0);
+
+  const turnovers =
+    data.filter(r => r.result === "TO").length;
+
+  const poss =
+    data.filter(r =>
+      r.result === "TO" ||
+      r.result?.includes("2") ||
+      r.result?.includes("3")
+    );
+
+  const stats = [
+    {
+      title: "% Ventajas generadas",
+      value: total ? (generatedAdvantage / total * 100).toFixed(1) + "%" : "-"
+    },
+    {
+      title: "% Tiros elegidos",
+      value: noFalta.length ? (selectedShot / noFalta.length * 100).toFixed(1) + "%" : "-"
+    },
+    {
+      title: "Puntos por tiro",
+      value: shots.length ? (points / shots.length).toFixed(2) : "-"
+    },
+    {
+      title: "TO%",
+      value: poss.length ? (turnovers / poss.length * 100).toFixed(1) + "%" : "-"
+    }
+  ];
+
+  document.getElementById("generalStats").innerHTML =
+    stats.map(s => `
+      <div style="
+        border:1px solid #ddd;
+        border-radius:8px;
+        padding:15px;
+        min-width:170px;
+        text-align:center;
+        background:#fafafa;
+      ">
+        <div style="
+          font-size:13px;
+          color:#666;
+        ">
+          ${s.title}
+        </div>
+
+        <div style="
+          font-size:28px;
+          font-weight:bold;
+          margin-top:8px;
+        ">
+          ${s.value}
+        </div>
+      </div>
+    `).join("");
 }
 
 function renderTeamToggles(teams) {
@@ -131,10 +228,9 @@ async function loadTeams() {
   const { data, error } = await supabase
     .from("actions")
     .select(`
+      spain_role,
       games!inner(
-        date,
-        home_team:teams!games_home_team_uuid_fkey(uuid, name),
-        away_team:teams!games_away_team_uuid_fkey(uuid, name)
+        date
       )
     `)
     .ilike("games.date", `${today}%`)
@@ -149,11 +245,12 @@ async function loadTeams() {
   const map = new Map();
 
   data.forEach(r => {
-    const home = r.games?.home_team;
-    const away = r.games?.away_team;
-
-    if (home) map.set(home.uuid, home);
-    if (away) map.set(away.uuid, away);
+    if (r.spain_role) {
+      map.set(r.spain_role, {
+        uuid: r.spain_role,
+        name: r.spain_role
+      });
+    }
   });
 
   const teams = Array.from(map.values()).slice(0, 2); // 🔥 limit 2
@@ -174,14 +271,16 @@ async function loadData() {
     .select(`
       *,
       games!inner(date),
-      team:teams!actions_team_uuid_fkey(name)
+      team:teams!actions_team_uuid_fkey(name),
+      handler:players!actions_handler_uuid_fkey(name),
+      roller:players!actions_roller_uuid_fkey(name)
     `)
     .ilike("games.date", `${today}%`)
     .order("id", { ascending: false });
 
   // 🔥 filtre per equip
   if (selectedTeam) {
-    query = query.eq("team_uuid", selectedTeam);
+    query = query.eq("spain_role", selectedTeam);
   }
 
   const { data, error } = await query;
@@ -195,8 +294,12 @@ async function loadData() {
   const clean = data.map(r => ({
     ...r,
     team: r.team?.name,
-    date: r.games?.date
+    date: r.games?.date,
+    handler: r.handler?.name,
+    roller: r.roller?.name
   }));
+
+  renderGeneralStats(clean);
 
   renderTable(clean);
   document.getElementById("status").innerText =
