@@ -35,23 +35,106 @@
     tr:nth-child(even) {
       background: #fafafa;
     }
+
+.toggle-btn{
+    padding:8px 14px;
+    margin-right:8px;
+    margin-bottom:8px;
+    border:1px solid #ccc;
+    background:white;
+    cursor:pointer;
+    border-radius:6px;
+    transition:.15s;
+}
+
+.toggle-btn:hover{
+    background:#f3f3f3;
+}
+
+.toggle-btn.active{
+    background:#1f6feb;
+    color:white;
+    border-color:#1f6feb;
+}
   </style>
 </head>
 
 <body>
 
-<h2>Actions Dashboard</h2>
+<h2>Directo España U20</h2>
 
-<!-- 🔥 SELECTOR EQUIPS -->
-<div id="teamToggles"></div>
+<h3 style="margin-bottom:8px;">Tipo de análisis</h3>
+<div id="teamToggles" style="margin-bottom:25px;"></div>
 
-<h3>Dades generals</h3>
+<h3 style="margin-bottom:8px;">Datos generales</h3>
 
 <div id="generalStats" style="
 display:flex;
 gap:15px;
 margin:15px 0;
 flex-wrap:wrap;
+"></div>
+
+
+<h3 style="margin-bottom:8px;">Rankings</h3>
+<div style="
+display:flex;
+gap:40px;
+align-items:flex-start;
+margin-bottom:20px;
+flex-wrap:wrap;
+">
+
+    <div>
+
+        <div style="
+            font-size:13px;
+            color:#666;
+            margin-bottom:6px;
+            font-weight:bold;
+        ">
+            Agrupar por
+        </div>
+
+        <div id="modeButtons">
+
+            <button id="bySpacing" class="toggle-btn">POR SPACING</button>
+            <button id="byPair" class="toggle-btn">POR JUGADOR/ES</button>
+
+        </div>
+
+    </div>
+
+    <div>
+
+        <div style="
+            font-size:13px;
+            color:#666;
+            margin-bottom:6px;
+            font-weight:bold;
+        ">
+            Filtrar
+        </div>
+
+        <div id="filterButtons">
+
+            <button id="onlyAll" class="toggle-btn">TODOS</button>
+            <button id="onlyPnR" class="toggle-btn">SÓLO P&R</button>
+            <button id="onlyORB" class="toggle-btn">SÓLO TRAS ORB</button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div id="rankingStats"
+style="
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+margin-top:20px;
 "></div>
 
 <div id="status">Carregant...</div>
@@ -69,11 +152,38 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YWpxYmh6dGpzc2dwbHlnYXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxOTg0OTEsImV4cCI6MjA5NDc3NDQ5MX0.8m7Qfh_5s2-4Bg92NXISG_w49myAYnmASOWrUR66I9Q"
 );
 
-let selectedTeam = "";
+let selectedTeam = "OFFENSE";
+let rankingMode = "spacing";   // spacing | pair
+let rankingFilter = "all";     // all | pnr | orb
+const isDefense = selectedTeam === "DEFENSE";
 
 /* ---------------------------
    RENDER TAULA
 ---------------------------- */
+function refreshRankingButtons(){
+
+    document.querySelectorAll("#modeButtons button")
+    .forEach(b=>b.classList.remove("active"));
+
+document.querySelectorAll("#filterButtons button")
+    .forEach(b=>b.classList.remove("active"));
+
+    if(rankingMode=="spacing")
+        bySpacing.classList.add("active");
+    else
+        byPair.classList.add("active");
+
+    if(rankingFilter=="all")
+        onlyAll.classList.add("active");
+
+    if(rankingFilter=="pnr")
+        onlyPnR.classList.add("active");
+
+    if(rankingFilter=="orb")
+        onlyORB.classList.add("active");
+
+}
+
 function renderTable(data) {
   const tbody = document.getElementById("tbody");
   const thead = document.getElementById("thead");
@@ -183,29 +293,39 @@ function renderGeneralStats(data) {
 }
 
 function renderTeamToggles(teams) {
-  const container = document.getElementById("teamToggles");
-  container.innerHTML = "";
 
-  teams.forEach(team => {
-    const btn = document.createElement("button");
+    const container = document.getElementById("teamToggles");
+    container.innerHTML = "";
 
-    btn.innerText = team.name;
-    btn.style.marginRight = "8px";
-    btn.style.padding = "6px 10px";
-    btn.style.cursor = "pointer";
+    teams.forEach(team => {
 
-    btn.onclick = () => {
-      selectedTeam = team.uuid;
+        const btn = document.createElement("button");
 
-      // UI highlight
-      [...container.children].forEach(b => b.style.background = "");
-      btn.style.background = "#ddd";
+        btn.innerText = team.name;
+        btn.className = "toggle-btn";
 
-      loadData();
-    };
+        if (team.uuid === selectedTeam) {
+            btn.classList.add("active");
+        }
 
-    container.appendChild(btn);
-  });
+        btn.onclick = () => {
+
+            selectedTeam = team.uuid;
+
+            [...container.children].forEach(b =>
+                b.classList.remove("active")
+            );
+
+            btn.classList.add("active");
+
+            loadData();
+
+        };
+
+        container.appendChild(btn);
+
+    });
+
 }
 
 /* ---------------------------
@@ -223,6 +343,7 @@ function getToday() {
    CARREGAR EQUIPS
 ---------------------------- */
 async function loadTeams() {
+refreshRankingButtons();
   const today = getToday();
 
   const { data, error } = await supabase
@@ -257,6 +378,56 @@ async function loadTeams() {
 
   renderTeamToggles(teams);
 }
+
+bySpacing.onclick=()=>{
+
+    rankingMode="spacing";
+
+    refreshRankingButtons();
+
+    loadData();
+
+};
+
+byPair.onclick=()=>{
+
+    rankingMode="pair";
+
+    refreshRankingButtons();
+
+    loadData();
+
+};
+
+onlyAll.onclick=()=>{
+
+    rankingFilter="all";
+
+    refreshRankingButtons();
+
+    loadData();
+
+};
+
+onlyPnR.onclick=()=>{
+
+    rankingFilter="pnr";
+
+    refreshRankingButtons();
+
+    loadData();
+
+};
+
+onlyORB.onclick=()=>{
+
+    rankingFilter="orb";
+
+    refreshRankingButtons();
+
+    loadData();
+
+};
 
 /* ---------------------------
    CARREGAR ACTIONS
@@ -299,11 +470,339 @@ async function loadData() {
     roller: r.roller?.name
   }));
 
-  renderGeneralStats(clean);
+  const overallStats = calcStats(clean);
 
-  renderTable(clean);
+  renderGeneralStats(clean);
+  renderRanking(clean, overallStats);
+  
   document.getElementById("status").innerText =
     `OK - ${data.length} registres`;
+}
+
+function calcStats(rows){
+
+    const total=rows.length;
+
+    const vg=rows.filter(r=>r.generated_advantage).length;
+
+    const noFalta=rows.filter(r=>r.result!="FALTA SIN TIROS");
+
+    const ts=noFalta.filter(r=>r.selected_shot).length;
+
+    const tiros=rows.filter(r=>
+        r.result?.includes("2") ||
+        r.result?.includes("3")
+    );
+
+    const pts=rows.reduce((s,r)=>{
+
+        if(r.result=="2+"||r.result=="2+1") return s+2;
+        if(r.result=="3+"||r.result=="3+1") return s+3;
+
+        return s;
+
+    },0);
+
+    const tov=rows.filter(r=>r.result=="TO").length;
+
+    const poss=rows.filter(r=>
+        r.result=="TO" ||
+        r.result?.includes("2") ||
+        r.result?.includes("3")
+    );
+
+    return{
+
+        n: total,
+
+        vg:total?vg/total:0,
+
+        ts:noFalta.length?ts/noFalta.length:0,
+
+        ppt:tiros.length?pts/tiros.length:0,
+
+        tov:poss.length?tov/poss.length:0
+
+    }
+
+}
+
+function renderRanking(data, overallStats){
+
+    let filtered=[...data];
+    const isDefense = selectedTeam === "DEFENSE";
+
+    if(rankingFilter==="pnr"){
+        filtered=filtered.filter(r=>r.focus?.includes("PnR"));
+    }
+
+    if(rankingFilter==="orb"){
+        filtered=filtered.filter(r=>r.possession_time!=null);
+    }
+
+    const groups={};
+
+    filtered.forEach(r=>{
+
+        let key;
+
+        if(rankingMode==="spacing"){
+
+            key=r.focus || "(Sense focus)";
+
+        }else{
+
+            if(r.roller){
+
+                key=`${r.handler} - ${r.roller}`;
+
+            }else{
+
+                key=`${r.handler} (${r.focus})`;
+
+            }
+
+        }
+
+        if(!groups[key]) groups[key]=[];
+
+        groups[key].push(r);
+
+    });
+
+    const rows=Object.entries(groups).map(([name,list])=>({
+
+        name,
+
+        ...calcStats(list)
+
+    }));
+
+    const metrics=[
+
+        {
+            title:"Ventajas generadas",
+            key:"vg",
+            format:v=>(v*100).toFixed(1)+"%"
+        },
+
+        {
+            title:"Tiros elegidos",
+            key:"ts",
+            format:v=>(v*100).toFixed(1)+"%"
+        },
+
+        {
+            title:"Puntos por tiro",
+            key:"ppt",
+            format:v=>v.toFixed(2)
+        },
+
+        {
+            title:"TO%",
+            key:"tov",
+            format:v=>(v*100).toFixed(1)+"%"
+        }
+
+    ];
+
+    document.getElementById("rankingStats").innerHTML=
+        metrics.map(metric=>{
+
+            const sorted=[...rows].sort((a,b)=>{
+
+    if(metric.key==="tov"){
+
+        return isDefense
+            ? b.tov-a.tov
+            : a.tov-b.tov;
+
+    }
+
+    return isDefense
+        ? a[metric.key]-b[metric.key]
+        : b[metric.key]-a[metric.key];
+
+});
+
+            return `
+
+            <div style="
+                border:1px solid #ddd;
+                border-radius:8px;
+                padding:12px;
+                background:white;
+            ">
+
+                <div style="
+                    font-weight:bold;
+                    font-size:16px;
+                ">
+                    ${metric.title}
+                </div>
+
+                <div style="
+                    font-size:30px;
+                    font-weight:bold;
+                    margin-top:4px;
+                ">
+                    ${metric.format(filtered.length ? calcStats(filtered)[metric.key] : 0)}
+
+${(()=>{
+    const filteredValue = filtered.length
+        ? calcStats(filtered)[metric.key]
+        : 0;
+
+    const generalValue = overallStats[metric.key];
+
+   let color="#999";
+
+if(metric.key==="tov"){
+
+    if(isDefense){
+
+        if(filteredValue>generalValue)
+            color="#2e7d32";
+        else if(filteredValue<generalValue)
+            color="#d32f2f";
+
+    }else{
+
+        if(filteredValue<generalValue)
+            color="#2e7d32";
+        else if(filteredValue>generalValue)
+            color="#d32f2f";
+
+    }
+
+}else{
+
+    if(isDefense){
+
+        if(filteredValue<generalValue)
+            color="#2e7d32";
+        else if(filteredValue>generalValue)
+            color="#d32f2f";
+
+    }else{
+
+        if(filteredValue>generalValue)
+            color="#2e7d32";
+        else if(filteredValue<generalValue)
+            color="#d32f2f";
+
+    }
+
+}
+
+    return `
+        <span style="
+            display:inline-block;
+            width:12px;
+            height:12px;
+            border-radius:50%;
+            background:${color};
+            margin-left:8px;
+            vertical-align:middle;
+        "></span>
+    `;
+
+})()}
+
+</span>
+                </div>
+
+                ${sorted.map(r=>{
+
+                    let better;
+
+                    if(metric.key==="tov"){
+
+    better = isDefense
+        ? r.tov > overallStats.tov
+        : r.tov < overallStats.tov;
+
+}else{
+
+    better = isDefense
+        ? r[metric.key] < overallStats[metric.key]
+        : r[metric.key] > overallStats[metric.key];
+
+}
+
+                    const equal=Math.abs(r[metric.key]-overallStats[metric.key])<0.0001;
+
+                    const color=equal
+                        ? "#666"
+                        : better
+                            ? "#1b8f3c"
+                            : "#d93025";
+
+                    const delta = r[metric.key] - overallStats[metric.key];
+
+                    return `
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        border-top:1px solid #eee;
+                        padding:8px 0;
+                    ">
+
+                        <div>
+
+                            <div>
+                                ${r.name}
+                            </div>
+
+                            <div style="
+                                font-size:11px;
+                                color:#777;
+                            ">
+                                ${r.n} ${r.n==1?"acción":"acciones"}
+                            </div>
+
+                        </div>
+
+                        <div style="
+                            text-align:right;
+                        ">
+
+                            <div style="
+                                font-weight:bold;
+                                color:${color};
+                            ">
+                                ${metric.format(r[metric.key])}
+                            </div>
+
+                            <div style="
+                                font-size:11px;
+                                color:${color};
+                            ">
+
+                                ${
+                                    metric.key==="ppt"
+                                        ? `${delta>=0?"+":""}${delta.toFixed(2)}`
+                                        : `${delta>=0?"+":""}${(delta*100).toFixed(1)}`
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    `;
+
+                }).join("")}
+
+            </div>
+
+            `;
+
+        }).join("");
+
 }
 
 /* ---------------------------
