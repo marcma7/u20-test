@@ -489,24 +489,35 @@ function calcStats(rows){
 
 function renderRanking(data, overallStats){
 
-  function getScoreColor(score) {
-    // clamp
-    const s = Math.max(0, Math.min(2, score));
+  function getScoreColor(score, min, mean, max) {
 
     let r, g, b;
 
-    if (s < 1) {
-      // vermell -> blanc
-      const t = s / 1;
+    if (score <= mean) {
+
+      // Vermell -> Blanc
+      const t = mean === min
+        ? 1
+        : (score - min) / (mean - min);
+
+      const clamped = Math.max(0, Math.min(1, t));
+
       r = 255;
-      g = Math.round(255 * t);
-      b = Math.round(255 * t);
+      g = Math.round(255 * clamped);
+      b = Math.round(255 * clamped);
+
     } else {
-      // blanc -> verd
-      const t = (s - 1) / 1;
-      r = Math.round(255 * (1 - t));
+
+      // Blanc -> Verd
+      const t = max === mean
+        ? 1
+        : (score - mean) / (max - mean);
+
+      const clamped = Math.max(0, Math.min(1, t));
+
+      r = Math.round(255 * (1 - clamped));
       g = 255;
-      b = Math.round(255 * (1 - t));
+      b = Math.round(255 * (1 - clamped));
     }
 
     return `rgb(${r},${g},${b})`;
@@ -579,6 +590,12 @@ function renderRanking(data, overallStats){
     r.score = Math.pow(r.vg + 1, 0.33) * Math.pow(r.ts + 1, 0.67) * Math.pow((r.ppt + 1) / 3, 1) * Math.pow(2 - r.tov, 1) * freqWeight;
   });
 
+  const scores = rows.map(r => r.score);
+
+  const meanScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+  const minScore = Math.min(...scores);
+  const maxScore = Math.max(...scores);
+
   const globalSorted=[...rows].sort((a,b)=> isDefense ? a.score-b.score : b.score-a.score);
 
   const metrics=[
@@ -611,7 +628,7 @@ function renderRanking(data, overallStats){
   globalSorted.map((r,index)=>
   {
     const selected = selectedRanking===r.name;
-    const color = getScoreColor(r.score);
+    const color = getScoreColor(r.score, minScore, meanScore, maxScore);
 
     const textColor = r.score > 1.4 ? "#0b1b0b" : "#111";
     
