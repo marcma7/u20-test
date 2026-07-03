@@ -571,7 +571,7 @@ function renderRanking(data, overallStats){
   });
 
   const meanN = rows.reduce((sum, r) => sum + r.n, 0) / rows.length;
-  const alpha = 0.1;
+  const alpha = 0.8;
 
   rows.forEach(r => {
     const freqWeight = Math.pow(r.n / meanN, alpha);
