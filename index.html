@@ -443,7 +443,9 @@ async function loadData() {
     team: r.team?.name,
     date: r.games?.date,
     handler: r.handler?.name,
-    roller: r.roller?.name
+    roller: r.roller?.name,
+    handlerNum: r.handler?.shirt_number,
+    rollerNum: r.roller?.shirt_number
   }));
 
   const overallStats = calcStats(clean);
@@ -560,11 +562,11 @@ function renderRanking(data, overallStats){
 
       if(r.roller){
 
-        key=`${r.handler} - ${r.roller}`;
+        key=`#${r.handlerNum} ${r.handler} - #${r.rollerNum} ${r.roller}`;
 
       }else{
 
-        key=`${r.handler} (${r.focus})`;
+        key=`#${r.handlerNum} ${r.handler} (${r.focus})`;
 
       }
     }
