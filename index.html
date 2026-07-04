@@ -438,6 +438,7 @@ async function loadData() {
     return;
   }
 
+  console.log(data)
   const clean = data.map(r => ({
     ...r,
     team: r.team?.name,
