@@ -419,8 +419,8 @@ async function loadData() {
       *,
       games!inner(date),
       team:teams!actions_team_uuid_fkey(name),
-      handler:players!actions_handler_uuid_fkey(name),
-      roller:players!actions_roller_uuid_fkey(name)
+      handler:players!actions_handler_uuid_fkey(name, shirt_number),
+      roller:players!actions_roller_uuid_fkey(name, shirt_number)
     `)
     .ilike("games.date", `${today}%`)
     .order("id", { ascending: false });
