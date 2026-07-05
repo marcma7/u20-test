@@ -475,15 +475,12 @@ async function loadTeams() {
 
   const map = new Map();
 
-  data.forEach(r => {
-    if (r.spain_role) {
-      map.set(r.spain_role, {uuid: r.spain_role, name: r.spain_role});
-    }
-  });
+  const teams = ["OFFENSE", "DEFENSE"].map(role => ({
+  uuid: role,
+  name: role
+}));
 
-  const teams = Array.from(map.values()).slice(0, 2);
-
-  renderTeamToggles(teams);
+renderTeamToggles(teams);
 }
 
 byPair.onclick = () => {
