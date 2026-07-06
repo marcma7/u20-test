@@ -56,6 +56,28 @@
     color:white;
     border-color:#1f6feb;
 }
+
+.focus-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px solid #eee;
+    padding:8px 10px;
+    cursor:pointer;
+    border-left:4px solid transparent;
+    transition:.15s;
+}
+
+.focus-row.selected{
+    background:#e3f2fd;
+    border-left-color:#1976d2;
+}
+
+.focus-row.selected .focus-name,
+.focus-row.selected .focus-value{
+    color:#1976d2 !important;
+    font-weight:700;
+}
   </style>
 </head>
 
@@ -69,15 +91,6 @@
   <div style="font-size:13px; color:#666; margin-bottom:6px; font-weight:bold;">Rol del equipo</div>
   
   <div id="teamToggles" style="margin-bottom:25px;"></div>
-</div>
-
-<div>
-  <div style="font-size:13px; color:#666; margin-bottom:6px; font-weight:bold;">Ver ranking de jugadores</div>
-  
-  <div id="modeButtons">
-    <button id="byPair" class="toggle-btn">SÍ</button>
-    <button id="bySpacing" class="toggle-btn">NO</button>
-  </div>
 </div>
 
 <div>
@@ -223,10 +236,11 @@ const supabase = createClient(
 
 let selectedTeam = "OFFENSE";
 let rankingFilter = "all";     // all | pnr | orb
-const isDefense = selectedTeam === "DEFENSE";
+let isDefense = selectedTeam === "DEFENSE";
 let transitionFilter = "";
 let showRankingStats = false;
 let selectedRanking = null;
+let selectedFocus = null;
 
 /* ---------------------------
    RENDER TAULA
@@ -234,15 +248,9 @@ let selectedRanking = null;
 function refreshRankingButtons(){
 
   document.querySelectorAll("#modeButtons button").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll("#filterButtons button")
-      .forEach(b => b.classList.remove("active"));
+  document.querySelectorAll("#filterButtons button").forEach(b => b.classList.remove("active"));
 
-  if(showRankingStats)
-      byPair.classList.add("active");
-  else
-      bySpacing.classList.add("active");
-
- switch (rankingFilter) {
+  switch (rankingFilter) {
     case "all":
         onlyAll.classList.add("active");
         break;
@@ -254,7 +262,8 @@ function refreshRankingButtons(){
     case "orb":
         onlyORB.classList.add("active");
         break;
-}
+  }
+
   transitionButtonsContainer.style.display = rankingFilter === "pnr" ? "block" : "none";
     
   if (rankingFilter !== "pnr") {
@@ -292,21 +301,14 @@ function renderStats(containerId, data, compact = false) {
   const shots = data.filter(r => r.result?.includes("2") || r.result?.includes("3"));
 
   const points = data.reduce((sum, r) => {
-
     if (r.result === "2+" || r.result === "2+1") return sum + 2;
     if (r.result === "3+" || r.result === "3+1") return sum + 3;
-
     return sum;
-
   }, 0);
 
   const turnovers = data.filter(r => r.result === "TO").length;
 
-  const poss = data.filter(r =>
-    r.result === "TO" ||
-    r.result?.includes("2") ||
-    r.result?.includes("3")
-  );
+  const poss = data.filter(r => r.result === "TO" || r.result?.includes("2") || r.result?.includes("3"));
 
   const stats = [
     {
@@ -334,23 +336,12 @@ function renderStats(containerId, data, compact = false) {
 
   document.getElementById(containerId).innerHTML =
     stats.map(s => `
-      <div style="
-        border:1px solid #ddd;
-        border-radius:8px;
-        padding:${padding};
-        text-align:center;
-        background:${bg};
-      ">
-        <div style="font-size:${titleSize}; color:#666;">
-          ${s.title}
-        </div>
+      <div style="border:1px solid #ddd; border-radius:8px; padding:${padding}; text-align:center; background:${bg};">
+        <div style="font-size:${titleSize}; color:#666;">${s.title}</div>
 
-        <div style="font-size:${valueSize}; font-weight:bold; margin-top:8px;">
-          ${s.value}
-        </div>
+        <div style="font-size:${valueSize}; font-weight:bold; margin-top:8px;">${s.value}</div>
       </div>
     `).join("");
-
 }
 
 
@@ -423,12 +414,12 @@ function renderTeamToggles(teams) {
         }
 
         btn.onclick = () => {
-
             selectedTeam = team.uuid;
+            selectedRanking = null;
+            isDefense = selectedTeam === "DEFENSE";
             [...container.children].forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             loadData();
-
         };
 
         container.appendChild(btn);
@@ -476,48 +467,31 @@ async function loadTeams() {
   const map = new Map();
 
   const teams = ["OFFENSE", "DEFENSE"].map(role => ({
-  uuid: role,
-  name: role
-}));
+    uuid: role,
+    name: role
+  }));
 
-renderTeamToggles(teams);
+  renderTeamToggles(teams);
 }
 
-byPair.onclick = () => {
-    showRankingStats = true;
-    refreshRankingButtons();
-    loadData();
-};
-
-bySpacing.onclick = () => {
-    showRankingStats = false;
-    refreshRankingButtons();
-    loadData();
-};
-
 onlyAll.onclick=()=>{
-
   rankingFilter="all";
   refreshRankingButtons();
   loadData();
-
 };
 
 onlyPnR.onclick=()=>{
-
   rankingFilter="pnr";
   refreshRankingButtons();
   loadData();
-
 };
 
 onlyORB.onclick=()=>{
-
   rankingFilter="orb";
   refreshRankingButtons();
   loadData();
-
 };
+
 
 /* ---------------------------
    CARREGAR ACTIONS
@@ -586,22 +560,22 @@ async function loadData() {
 
   const transitionGroups = allGroups.filter(g =>
     g.rows.some(r => r.transition_screen === "TRANSICIÓN")
-);
+  );
 
-const setGroups = allGroups.filter(g =>
+  const setGroups = allGroups.filter(g =>
     g.rows.some(r => r.transition_screen === "ESTÁTICO")
-);
+  );
 
-const pbkGroups = allGroups.filter(g =>
+  const pbkGroups = allGroups.filter(g =>
     g.rows.some(r => r.possession_time != null)
-);
+  );
 
-const otherGroups = allGroups.filter(g =>
+  const otherGroups = allGroups.filter(g =>
     g.rows.some(r =>
         r.possession_time == null &&
         r.transition_screen == null
     )
-);
+  );
 
   document.getElementById("transitionCount").innerText = `(${transitionRows.length})`;
   document.getElementById("setCount").innerText = `(${setRows.length})`;
@@ -621,8 +595,7 @@ const otherGroups = allGroups.filter(g =>
   renderStats("pbkStats", pbkRows, true);
   renderStats("otherStats", otherRows, true);
 
-  document.getElementById("rankingStats").style.display =
-    showRankingStats ? "grid" : "none";
+  document.getElementById("rankingStats").style.display = "grid";
 
   renderRanking(allGroups, overallStats, colorScale, "globalRanking", "rankingStats");
 
@@ -635,33 +608,20 @@ const otherGroups = allGroups.filter(g =>
       const focusRows = selectedGroup.rows;
       const playerGroups = buildPlayerGroups(focusRows);
 
-      const playerRows = playerGroups.map(p => ({
-  name: p.name,
-  n: p.n,
-  vg: p.vg,
-  ts: p.ts,
-  ppt: p.ppt,
-  tov: p.tov,
-  rows: p.rows
-}));
+      const playerRows = playerGroups.map(p => ({name: p.name, n: p.n, vg: p.vg, ts: p.ts, ppt: p.ppt, tov: p.tov, rows: p.rows}));
 
-renderPlayerRanking(playerRows, focusRows, overallStats);
-
-
+      renderPlayerRanking(playerRows, focusRows, overallStats);
     }
-
-}else{
-    console.log(allGroups)
-renderFocusRanking(allGroups, overallStats);
-
-}
+  }else{
+    renderFocusRanking(allGroups, overallStats);
+  }
   document.getElementById("status").innerText = `OK - ${data.length} registres`;
 }
 
 
 function renderPlayerRanking(rows, focusRows, overallStats){
 
-const metrics=[
+  const metrics=[
     {
         title:"Ventajas generadas",
         key:"vg",
@@ -682,12 +642,11 @@ const metrics=[
         key:"tov",
         format:v=>(v*100).toFixed(1)+"%"
     }
-];
+  ];
 
-// 🔥 stats del FOCUS (NO jugadors)
-const focusStats = calcStats(focusRows);
+  const focusStats = calcStats(focusRows);
 
-document.getElementById("rankingStats").innerHTML =
+  document.getElementById("rankingStats").innerHTML =
     metrics.map(metric => {
 
       const sorted = [...rows].sort((a, b) => {
@@ -719,17 +678,18 @@ document.getElementById("rankingStats").innerHTML =
     const value = focusStats[metric.key];
     const ref = overallStats[metric.key];
 
-    let color = "#999";
+    const delta = value - ref;
 
-    if (metric.key === "tov") {
-      color = isDefense
-        ? (value > ref ? "#2e7d32" : "#d32f2f")
-        : (value < ref ? "#2e7d32" : "#d32f2f");
-    } else {
-      color = isDefense
-        ? (value < ref ? "#2e7d32" : "#d32f2f")
-        : (value > ref ? "#2e7d32" : "#d32f2f");
-    }
+    let color;
+          if (metric.key === "tov") {
+            color = isDefense
+              ? (delta < 0 ? "#d32f2f" : (delta > 0 ? "#2e7d32" : "#999"))
+              : (delta < 0 ? "#2e7d32" : (delta > 0 ? "#d32f2f" : "#999"));
+          } else {
+            color = isDefense
+              ? (delta > 0 ? "#d32f2f" : (delta < 0 ? "#2e7d32" : "#999"))
+              : (delta > 0 ? "#2e7d32" : (delta < 0 ? "#d32f2f" : "#999"));
+          }
 
     return `<span style="
       display:inline-block;
@@ -752,14 +712,23 @@ document.getElementById("rankingStats").innerHTML =
           const playerStats = calcStats(rows);
           const delta = r[metric.key] - focusStats[metric.key];
 
-          const color = delta > 0 ? "#1b8f3c" : delta < 0 ? "#d93025" : "#666";
+          let color;
+          if (metric.key === "tov") {
+            color = isDefense
+              ? (delta < 0 ? "#d93025" : (delta > 0 ? "#1b8f3c" : "#666"))
+              : (delta < 0 ? "#1b8f3c" : (delta > 0 ? "#d93025" : "#666"));
+          } else {
+            color = isDefense
+              ? (delta > 0 ? "#d93025" : (delta < 0 ? "#1b8f3c" : "#666"))
+              : (delta > 0 ? "#1b8f3c" : (delta < 0 ? "#d93025" : "#666"));
+          }
 
           let fontSize = "13px";
           if(index === 0) fontSize = "16px";
           else if(index === 1) fontSize = "15px";
           else if(index === 2) fontSize = "14px";
 
-          return `<div onclick="window.selectRankingItem('${r.name}')"
+          return `<div 
             style="display:flex; justify-content:space-between; align-items:center;
             border-top:1px solid #eee; padding:8px 0; cursor:pointer;
             background:${selected ? "#eaf3ff" : "transparent"};">
@@ -820,12 +789,10 @@ function renderFocusRanking(groups, overallStats){
         const sorted = [...groups].sort((a,b)=>{
 
             if(metric.key==="tov"){
-                return isDefense ? b.tov-a.tov : a.tov-b.tov;
+                return a.tov-b.tov;
             }
 
-            return isDefense
-                ? a[metric.key]-b[metric.key]
-                : b[metric.key]-a[metric.key];
+            return b[metric.key]-a[metric.key];
 
         });
 
@@ -878,33 +845,75 @@ function renderFocusRanking(groups, overallStats){
             ${sorted.map((r,index)=>{
 
                 const delta = r[metric.key]-overallStats[metric.key];
-                const color = delta>0 ? "#1b8f3c" : delta<0 ? "#d93025" : "#666";
+
+                let color = delta>0 ? "#1b8f3c" : delta<0 ? "#d93025" : "#666";
+
+                color = "#999";
+
+                    if(metric.key==="tov"){
+
+                        if(isDefense){
+                            if(delta>0) color="#2e7d32";
+                            else if(delta<0) color="#d32f2f";
+                        }else{
+                            if(delta<0) color="#2e7d32";
+                            else if(delta>0) color="#d32f2f";
+                        }
+
+                    }else{
+
+                        if(isDefense){
+                            if(delta<0) color="#2e7d32";
+                            else if(delta>0) color="#d32f2f";
+                        }else{
+                            if(delta>0) color="#2e7d32";
+                            else if(delta<0) color="#d32f2f";
+                        }
+
+                    }
 
                 let fontSize="13px";
                 if(index===0) fontSize="16px";
                 else if(index===1) fontSize="15px";
                 else if(index===2) fontSize="14px";
 
-                return `
-                <div onclick="window.selectRankingItem('${r.name}')"
-                     style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding:8px 0;cursor:pointer;">
+                const isSelected = selectedFocus === r.name;
+
+return `
+<div
+     style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        border-top:1px solid #eee;
+        padding:8px 10px;
+        cursor:pointer;
+        border-radius:6px;
+        margin-top:2px;
+        background:${isSelected ? '#e3f2fd' : 'transparent'};
+        border-left:${isSelected ? '4px solid #1976d2' : '4px solid transparent'};
+        transition:none;
+     ">
+
 
                     <div>
-                        <div style="font-size:${fontSize};font-weight:500;">
-                            ${r.name}
-                        </div>
+    <div class="focus-name"
+         style="font-size:${fontSize};font-weight:500;">
+        ${r.name}
+    </div>
 
-                        <div style="font-size:11px;color:#777;">
-                            ${r.n} ${r.n===1?"acción":"acciones"}
-                        </div>
+    <div style="font-size:11px;color:#777;">
+        ${r.n} ${r.n===1?"acción":"acciones"}
+    </div>
 
-                    </div>
+</div>
 
-                    <div style="text-align:right;">
-                        <div style="font-weight:bold;color:${color};">
-                            ${metric.format(r[metric.key])}
-                        </div>
-                    </div>
+<div style="text-align:right;">
+    <div class="focus-value"
+         style="font-weight:bold;color:${color};">
+        ${metric.format(r[metric.key])}
+    </div>
+</div>
 
                 </div>`;
 
@@ -1121,33 +1130,37 @@ function renderRanking(
     const compact = rankingDiv !== "globalRanking";
     const isDefense = selectedTeam === "DEFENSE";
 
-    function getScoreColor(score, min, mean, max){
+    function getScoreColor(score, min, mean, max) {
 
-        let r,g,b;
+    // Invertim l'escala si és DEFENSE
+    if (isDefense) {
+        score = max - (score - min); // equivalent a min + max - score
+    }
 
-        if(score<=mean){
+    let r, g, b;
 
-            const t = mean===min ? 1 : (score-min)/(mean-min);
-            const c = Math.max(0,Math.min(1,t));
+    if (score <= mean) {
 
-            r=255;
-            g=Math.round(255*c);
-            b=Math.round(255*c);
+        const t = mean === min ? 1 : (score - min) / (mean - min);
+        const c = Math.max(0, Math.min(1, t));
 
-        }else{
+        r = 255;
+        g = Math.round(255 * c);
+        b = Math.round(255 * c);
 
-            const t = max===mean ? 1 : (score-mean)/(max-mean);
-            const c = Math.max(0,Math.min(1,t));
+    } else {
 
-            r=Math.round(255*(1-c));
-            g=255;
-            b=Math.round(255*(1-c));
+        const t = max === mean ? 1 : (score - mean) / (max - mean);
+        const c = Math.max(0, Math.min(1, t));
 
-        }
-
-        return `rgb(${r},${g},${b})`;
+        r = Math.round(255 * (1 - c));
+        g = 255;
+        b = Math.round(255 * (1 - c));
 
     }
+
+    return `rgb(${r},${g},${b})`;
+}
 
     let filtered=[...data];
 
@@ -1280,9 +1293,6 @@ function renderRanking(
 
     if(statsDiv){
 
-    console.log(statsDiv);
-    console.log(document.getElementById(statsDiv));
-
         document.getElementById(statsDiv).innerHTML=
 
         metrics.map(metric=>{
@@ -1322,7 +1332,7 @@ function renderRanking(
                     else if(index===2) fontSize="14px";
 
                     return `
-                    <div onclick="window.selectRankingItem('${r.name}')"
+                    <div 
                          style="
                             display:flex;
                             justify-content:space-between;
@@ -1376,8 +1386,10 @@ function buildPlayerGroups(rows){
 
         if(r.roller){
             key = `#${r.handlerNum} ${r.handler} - #${r.rollerNum} ${r.roller}`;
-        }else{
+        }else if(r.handler){
             key = `#${r.handlerNum} ${r.handler}`;
+        } else {
+            key = `Datos de equipo`;
         }
 
         if(!groups[key]){
@@ -1412,6 +1424,19 @@ window.selectRankingItem = function(raw){
     loadData();
 };
 
+
+window.highlightFocus = function(focus){
+
+    console.time("highlight");
+
+    selectedFocus = focus;
+
+    document.querySelectorAll(".focus-row").forEach(row=>{
+        row.classList.toggle("selected", row.dataset.focus === focus);
+    });
+    console.timeEnd("highlight");
+
+}
 /* ---------------------------
    INIT
 ---------------------------- */
