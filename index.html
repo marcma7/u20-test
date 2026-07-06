@@ -91,29 +91,104 @@
 </p>
 
 <h3 style="margin-bottom:8px;">Filtros</h3>
-<div style="display:flex; gap:40px; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap;">
 
-<div>
-  <div style="font-size:13px; color:#666; margin-bottom:6px; font-weight:bold;">Rol del equipo</div>
-  
-  <div id="teamToggles" style="margin-bottom:25px;"></div>
-</div>
+<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:40px; margin-bottom:20px;">
 
-<div>
-  <div style="font-size:13px; color:#666; margin-bottom:6px; font-weight:bold;">Tipo de acciones</div>
+  <!-- ESQUERRA: FILTRES -->
+  <div style="display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap;">
 
-  <div id="filterButtons">
-    <button id="onlyAll" class="toggle-btn">TODOS</button>
-    <button id="onlyPnR" class="toggle-btn">SÓLO P&R</button>
-    <button id="onlyORB" class="toggle-btn">SÓLO TRAS ORB</button>
+    <div>
+      <div style="font-size:13px; color:#666; margin-bottom:6px; font-weight:bold;">
+        Rol del equipo
+      </div>
+
+      <div id="teamToggles" style="margin-bottom:25px;"></div>
+    </div>
+
+    <div>
+      <div style="font-size:13px; color:#666; margin-bottom:6px; font-weight:bold;">
+        Tipo de acciones
+      </div>
+
+      <div id="filterButtons">
+        <button id="onlyAll" class="toggle-btn">TODOS</button>
+        <button id="onlyPnR" class="toggle-btn">SÓLO P&R</button>
+        <button id="onlyORB" class="toggle-btn">SÓLO TRAS ORB</button>
+      </div>
+    </div>
+
+    <div id="transitionButtonsContainer" style="display:none;">
+      <div style="font-size:13px; color:#666; margin-bottom:6px; font-weight:bold;">
+        Tipo de bloqueo
+      </div>
+
+      <div id="transitionButtons"></div>
+    </div>
+
   </div>
-</div>
 
-<div id="transitionButtonsContainer" style="display:none;">
-  <div style="font-size:13px; color:#666; margin-bottom:6px; font-weight:bold;">Tipo de bloqueo</div>
+  <!-- DRETA: TARGETES REBOT -->
+  <div id="reboundCards"
+       style="display:flex; gap:15px;">
 
-  <div id="transitionButtons"></div>
-</div>
+    <!-- ORB -->
+    <div
+      style="
+        width:150px;
+        background:#fff;
+        border:1px solid #ddd;
+        border-radius:10px;
+        padding:16px;
+        text-align:center;
+        box-shadow:0 1px 4px rgba(0,0,0,.08);
+      ">
+
+      <div style="font-size:13px; color:#666; font-weight:bold;">
+        ORB%
+      </div>
+
+      <div id="orbPct"
+           style="font-size:34px; font-weight:bold; margin:12px 0 8px;">
+        --
+      </div>
+
+      <div id="orbDetail"
+           style="font-size:13px; color:#666;">
+        --
+      </div>
+
+    </div>
+
+    <!-- DRB -->
+    <div
+      style="
+        width:150px;
+        background:#fff;
+        border:1px solid #ddd;
+        border-radius:10px;
+        padding:16px;
+        text-align:center;
+        box-shadow:0 1px 4px rgba(0,0,0,.08);
+      ">
+
+      <div style="font-size:13px; color:#666; font-weight:bold;">
+        DRB%
+      </div>
+
+      <div id="drbPct"
+           style="font-size:34px; font-weight:bold; margin:12px 0 8px;">
+        --
+      </div>
+
+      <div id="drbDetail"
+           style="font-size:13px; color:#666;">
+        --
+      </div>
+
+    </div>
+
+  </div>
+
 </div>
 
 <h3 style="margin-bottom:10px;">Ranking global</h3>
@@ -519,12 +594,25 @@ async function loadData() {
     .ilike("games.date", `${today}%`)
     .order("id", { ascending: false });
 
+  let rebQuery = supabase
+    .from("actions")
+    .select(`
+      *,
+      games!inner(date),
+      team:teams!actions_team_uuid_fkey(name),
+      rebound_team:teams!actions_rebound_team_uuid_fkey(name)
+    `)
+    .ilike("games.date", `${today}%`)
+     .not("rebound_team_uuid", "is", null)
+    .order("id", { ascending: false });
+
   // 🔥 filtre per rol
   if (selectedTeam) {
     query = query.eq("spain_role", selectedTeam);
   }
 
   const { data, error } = await query;
+  const result = await rebQuery;
 
   if (error) {
     console.error(error);
@@ -543,7 +631,53 @@ async function loadData() {
     score_group: getRankingGroup(r)
   }));
 
+ const cleanReb = result.data.map(r => ({
+  ...r,
+  team: r.team?.name,
+  date: r.games?.date,
+  rebound_team: r.rebound_team?.name
+}));
+
   const rankingData = buildRankingGroups(clean);
+  const orbOpportunities = cleanReb.filter(r =>
+  r.team === "ESPAÑA U20"
+).length;
+
+const orbMade = cleanReb.filter(r =>
+  r.team === "ESPAÑA U20" &&
+  r.rebound_team === "ESPAÑA U20"
+).length;
+
+const orbPct = orbOpportunities
+  ? orbMade / orbOpportunities * 100
+  : 0;
+
+  const drbOpportunities = cleanReb.filter(r =>
+  r.team !== "ESPAÑA U20"
+).length;
+
+const drbMade = cleanReb.filter(r =>
+  r.team !== "ESPAÑA U20" &&
+  r.rebound_team === "ESPAÑA U20"
+).length;
+
+const drbPct = drbOpportunities
+  ? drbMade / drbOpportunities * 100
+  : 0;
+
+document.getElementById("orbPct").textContent =
+  orbPct.toFixed(1) + "%";
+
+document.getElementById("orbDetail").textContent =
+  `${orbMade}/${orbOpportunities}`;
+
+document.getElementById("drbPct").textContent =
+  drbPct.toFixed(1) + "%";
+
+document.getElementById("drbDetail").textContent =
+  `${drbMade}/${drbOpportunities}`;
+  console.log(orbPct);
+  console.log(drbPct);
 
   const allGroups = rankingData.groups;
   const colorScale = rankingData.colorScale;
