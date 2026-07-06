@@ -626,18 +626,16 @@ const otherGroups = allGroups.filter(g =>
 
   renderRanking(allGroups, overallStats, colorScale, "globalRanking", "rankingStats");
 
-  if(showRankingStats && selectedRanking){
+  if(selectedRanking){
 
-const selectedGroup =
-    allGroups.find(g => g.name.split("|||")[0] === selectedRanking);
-
+    const selectedGroup = allGroups.find(g => g.name.split("|||")[0] === selectedRanking);
 
     if(selectedGroup){
 
-       const focusRows = selectedGroup.rows;
-const playerGroups = buildPlayerGroups(focusRows);
+      const focusRows = selectedGroup.rows;
+      const playerGroups = buildPlayerGroups(focusRows);
 
-const playerRows = playerGroups.map(p => ({
+      const playerRows = playerGroups.map(p => ({
   name: p.name,
   n: p.n,
   vg: p.vg,
@@ -649,11 +647,12 @@ const playerRows = playerGroups.map(p => ({
 
 renderPlayerRanking(playerRows, focusRows, overallStats);
 
+
     }
 
 }else{
-
-    document.getElementById("rankingStats").innerHTML = "";
+    console.log(allGroups)
+renderFocusRanking(allGroups, overallStats);
 
 }
   document.getElementById("status").innerText = `OK - ${data.length} registres`;
@@ -789,6 +788,133 @@ document.getElementById("rankingStats").innerHTML =
 
 }
 
+
+function renderFocusRanking(groups, overallStats){
+
+    const metrics = [
+        {
+            title:"Ventajas generadas",
+            key:"vg",
+            format:v=>(v*100).toFixed(1)+"%"
+        },
+        {
+            title:"Tiros elegidos",
+            key:"ts",
+            format:v=>(v*100).toFixed(1)+"%"
+        },
+        {
+            title:"Puntos por tiro",
+            key:"ppt",
+            format:v=>v.toFixed(2)
+        },
+        {
+            title:"TO%",
+            key:"tov",
+            format:v=>(v*100).toFixed(1)+"%"
+        }
+    ];
+
+    document.getElementById("rankingStats").innerHTML =
+    metrics.map(metric => {
+
+        const sorted = [...groups].sort((a,b)=>{
+
+            if(metric.key==="tov"){
+                return isDefense ? b.tov-a.tov : a.tov-b.tov;
+            }
+
+            return isDefense
+                ? a[metric.key]-b[metric.key]
+                : b[metric.key]-a[metric.key];
+
+        });
+
+        return `
+        <div style="border:1px solid #ddd;border-radius:8px;padding:12px;background:white;">
+
+            <div style="font-weight:bold;font-size:16px;">
+                ${metric.title}
+            </div>
+
+            <div style="font-size:30px;font-weight:bold;margin-top:4px;display:flex;align-items:center;gap:8px;">
+
+                <span>${metric.format(overallStats[metric.key])}</span>
+
+                ${(() => {
+
+                    const value = overallStats[metric.key];
+                    const ref = overallStats[metric.key];
+
+                    let color = "#999";
+
+                    if(metric.key==="tov"){
+
+                        if(isDefense){
+                            if(value>ref) color="#2e7d32";
+                            else if(value<ref) color="#d32f2f";
+                        }else{
+                            if(value<ref) color="#2e7d32";
+                            else if(value>ref) color="#d32f2f";
+                        }
+
+                    }else{
+
+                        if(isDefense){
+                            if(value<ref) color="#2e7d32";
+                            else if(value>ref) color="#d32f2f";
+                        }else{
+                            if(value>ref) color="#2e7d32";
+                            else if(value<ref) color="#d32f2f";
+                        }
+
+                    }
+
+                    return `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${color};"></span>`;
+
+                })()}
+
+            </div>
+
+            ${sorted.map((r,index)=>{
+
+                const delta = r[metric.key]-overallStats[metric.key];
+                const color = delta>0 ? "#1b8f3c" : delta<0 ? "#d93025" : "#666";
+
+                let fontSize="13px";
+                if(index===0) fontSize="16px";
+                else if(index===1) fontSize="15px";
+                else if(index===2) fontSize="14px";
+
+                return `
+                <div onclick="window.selectRankingItem('${r.name}')"
+                     style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding:8px 0;cursor:pointer;">
+
+                    <div>
+                        <div style="font-size:${fontSize};font-weight:500;">
+                            ${r.name}
+                        </div>
+
+                        <div style="font-size:11px;color:#777;">
+                            ${r.n} ${r.n===1?"acción":"acciones"}
+                        </div>
+
+                    </div>
+
+                    <div style="text-align:right;">
+                        <div style="font-weight:bold;color:${color};">
+                            ${metric.format(r[metric.key])}
+                        </div>
+                    </div>
+
+                </div>`;
+
+            }).join("")}
+
+        </div>`;
+
+    }).join("");
+
+}
 
 function renderPlayerCards(playerGroups){
 
