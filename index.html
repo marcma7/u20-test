@@ -36,48 +36,48 @@
       background: #fafafa;
     }
 
-.toggle-btn{
-    padding:8px 14px;
-    margin-right:8px;
-    margin-bottom:8px;
-    border:1px solid #ccc;
-    background:white;
-    cursor:pointer;
-    border-radius:6px;
-    transition:.15s;
-}
+    .toggle-btn{
+        padding:8px 14px;
+        margin-right:8px;
+        margin-bottom:8px;
+        border:1px solid #ccc;
+        background:white;
+        cursor:pointer;
+        border-radius:6px;
+        transition:.15s;
+    }
 
-.toggle-btn:hover{
-    background:#f3f3f3;
-}
+    .toggle-btn:hover{
+        background:#f3f3f3;
+    }
 
-.toggle-btn.active{
-    background:#1f6feb;
-    color:white;
-    border-color:#1f6feb;
-}
+    .toggle-btn.active{
+        background:#1f6feb;
+        color:white;
+        border-color:#1f6feb;
+    }
 
-.focus-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    border-top:1px solid #eee;
-    padding:8px 10px;
-    cursor:pointer;
-    border-left:4px solid transparent;
-    transition:.15s;
-}
+    .focus-row{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        border-top:1px solid #eee;
+        padding:8px 10px;
+        cursor:pointer;
+        border-left:4px solid transparent;
+        transition:.15s;
+    }
 
-.focus-row.selected{
-    background:#e3f2fd;
-    border-left-color:#1976d2;
-}
+    .focus-row.selected{
+        background:#e3f2fd;
+        border-left-color:#1976d2;
+    }
 
-.focus-row.selected .focus-name,
-.focus-row.selected .focus-value{
-    color:#1976d2 !important;
-    font-weight:700;
-}
+    .focus-row.selected .focus-name,
+    .focus-row.selected .focus-value{
+        color:#1976d2 !important;
+        font-weight:700;
+    }
   </style>
 </head>
 
@@ -93,7 +93,6 @@
 <h3 style="margin-bottom:8px;">Filtros</h3>
 
 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:40px; margin-bottom:20px;">
-
   <!-- ESQUERRA: FILTRES -->
   <div style="display:flex; gap:40px; align-items:flex-start; flex-wrap:wrap;">
 
@@ -133,15 +132,7 @@
 
     <!-- ORB -->
     <div
-      style="
-        width:150px;
-        background:#fff;
-        border:1px solid #ddd;
-        border-radius:10px;
-        padding:16px;
-        text-align:center;
-        box-shadow:0 1px 4px rgba(0,0,0,.08);
-      ">
+      style="width:150px; background:#fff; border:1px solid #ddd; border-radius:10px; padding:16px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.08);">
 
       <div style="font-size:13px; color:#666; font-weight:bold;">
         ORB%
@@ -160,28 +151,17 @@
     </div>
 
     <!-- DRB -->
-    <div
-      style="
-        width:150px;
-        background:#fff;
-        border:1px solid #ddd;
-        border-radius:10px;
-        padding:16px;
-        text-align:center;
-        box-shadow:0 1px 4px rgba(0,0,0,.08);
-      ">
+    <div style="width:150px; background:#fff; border:1px solid #ddd; border-radius:10px; padding:16px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.08);">
 
       <div style="font-size:13px; color:#666; font-weight:bold;">
         DRB%
       </div>
 
-      <div id="drbPct"
-           style="font-size:34px; font-weight:bold; margin:12px 0 8px;">
+      <div id="drbPct" style="font-size:34px; font-weight:bold; margin:12px 0 8px;">
         --
       </div>
 
-      <div id="drbDetail"
-           style="font-size:13px; color:#666;">
+      <div id="drbDetail" style="font-size:13px; color:#666;">
         --
       </div>
 
@@ -199,8 +179,7 @@
     Datos generales
   </h3>
 
-  <div id="generalStats"
-       style="grid-column:span 8; display:grid; grid-template-columns:repeat(4,1fr); gap:15px;">
+  <div id="generalStats" style="grid-column:span 8; display:grid; grid-template-columns:repeat(4,1fr); gap:15px;">
   </div>
 </div>
 
@@ -212,8 +191,7 @@
   <div style="display:flex; align-items:center;">
     <h4 style="margin:0; font-size:16px; color:#555;">
       P&R transición
-      <span id="transitionCount"
-            style="font-size:12px; color:#888; font-weight:normal;">
+      <span id="transitionCount" style="font-size:12px; color:#888; font-weight:normal;">
       </span>
     </h4>
   </div>
@@ -262,8 +240,7 @@
   <div style="display:flex; align-items:center;">
     <h4 style="margin:0; font-size:16px; color:#555;">
       Tras rebote ofensivo
-      <span id="pbkCount"
-        style="font-size:12px; color:#888; font-weight:normal;">
+      <span id="pbkCount" style="font-size:12px; color:#888; font-weight:normal;">
       </span>
     </h4>
   </div>
@@ -271,8 +248,7 @@
   <!-- Contingut -->
   <div>
     <!-- Targetes -->
-    <div id="pbkStats"
-         style="display:grid; grid-template-columns:repeat(4,1fr); gap:15px;">
+    <div id="pbkStats" style="display:grid; grid-template-columns:repeat(4,1fr); gap:15px;">
     </div>
   </div>
 
@@ -286,8 +262,7 @@
   <div style="display:flex; align-items:center;">
     <h4 style="margin:0; font-size:16px; color:#555;">
       Otros
-      <span id="otherCount"
-        style="font-size:12px; color:#888; font-weight:normal;">
+      <span id="otherCount" style="font-size:12px; color:#888; font-weight:normal;">
       </span>
     </h4>
   </div>
@@ -296,8 +271,7 @@
   <div>
 
     <!-- Targetes -->
-    <div id="otherStats"
-         style="display:grid; grid-template-columns:repeat(4,1fr); gap:15px;">
+    <div id="otherStats" style="display:grid; grid-template-columns:repeat(4,1fr); gap:15px;">
     </div>
   </div>
 
@@ -316,7 +290,7 @@ const supabase = createClient(
 );
 
 let selectedTeam = "OFFENSE";
-let rankingFilter = "all";     // all | pnr | orb
+let rankingFilter = "all";
 let isDefense = selectedTeam === "DEFENSE";
 let transitionFilter = "";
 let showRankingStats = false;
@@ -451,11 +425,7 @@ function renderTransitionButtons(rows){
 
     // Altres valors
     const values=[
-        ...new Set(
-            rows
-                .map(r=>r.transition_screen)
-                .filter(v=>v)
-        )
+        ...new Set(rows.map(r=>r.transition_screen).filter(v=>v))
     ];
 
     values.forEach(value=>{
@@ -606,7 +576,6 @@ async function loadData() {
      .not("rebound_team_uuid", "is", null)
     .order("id", { ascending: false });
 
-  // 🔥 filtre per rol
   if (selectedTeam) {
     query = query.eq("spain_role", selectedTeam);
   }
@@ -631,90 +600,53 @@ async function loadData() {
     score_group: getRankingGroup(r)
   }));
 
- const cleanReb = result.data.map(r => ({
-  ...r,
-  team: r.team?.name,
-  date: r.games?.date,
-  rebound_team: r.rebound_team?.name
-}));
+  const cleanReb = result.data.map(r => ({
+    ...r,
+    team: r.team?.name,
+    date: r.games?.date,
+    rebound_team: r.rebound_team?.name
+  }));
 
   const rankingData = buildRankingGroups(clean);
-  const orbOpportunities = cleanReb.filter(r =>
-  r.team === "ESPAÑA U20"
-).length;
+  const orbOpportunities = cleanReb.filter(r => r.team === "ESPAÑA U20").length;
 
-const orbMade = cleanReb.filter(r =>
-  r.team === "ESPAÑA U20" &&
-  r.rebound_team === "ESPAÑA U20"
-).length;
+  const orbMade = cleanReb.filter(r => r.team === "ESPAÑA U20" && r.rebound_team === "ESPAÑA U20").length;
 
-const orbPct = orbOpportunities
-  ? orbMade / orbOpportunities * 100
-  : 0;
+  const orbPct = orbOpportunities ? orbMade / orbOpportunities * 100 : 0;
 
-  const drbOpportunities = cleanReb.filter(r =>
-  r.team !== "ESPAÑA U20"
-).length;
+  const drbOpportunities = cleanReb.filter(r => r.team !== "ESPAÑA U20").length;
 
-const drbMade = cleanReb.filter(r =>
-  r.team !== "ESPAÑA U20" &&
-  r.rebound_team === "ESPAÑA U20"
-).length;
+  const drbMade = cleanReb.filter(r => r.team !== "ESPAÑA U20" && r.rebound_team === "ESPAÑA U20").length;
 
-const drbPct = drbOpportunities
-  ? drbMade / drbOpportunities * 100
-  : 0;
+  const drbPct = drbOpportunities ? drbMade / drbOpportunities * 100 : 0;
 
-document.getElementById("orbPct").textContent =
-  orbPct.toFixed(1) + "%";
+  document.getElementById("orbPct").textContent = orbPct.toFixed(1) + "%";
 
-document.getElementById("orbDetail").textContent =
-  `${orbMade}/${orbOpportunities}`;
+  document.getElementById("orbDetail").textContent = `${orbMade}/${orbOpportunities}`;
 
-document.getElementById("drbPct").textContent =
-  drbPct.toFixed(1) + "%";
+  document.getElementById("drbPct").textContent = drbPct.toFixed(1) + "%";
 
-document.getElementById("drbDetail").textContent =
-  `${drbMade}/${drbOpportunities}`;
-  console.log(orbPct);
-  console.log(drbPct);
+  document.getElementById("drbDetail").textContent = `${drbMade}/${drbOpportunities}`;
 
   const allGroups = rankingData.groups;
   const colorScale = rankingData.colorScale;
 
-  const transitionRows = clean.filter(
-    r => r.transition_screen === "TRANSICIÓN"
-  );
+  const transitionRows = clean.filter(r => r.transition_screen === "TRANSICIÓN");
 
-  const setRows = clean.filter(
-    r => r.transition_screen === "ESTÁTICO" && r.possession_time === null
-  );
+  const setRows = clean.filter(r => r.transition_screen === "ESTÁTICO" && r.possession_time === null);
 
-  const pbkRows = clean.filter(
-    r => r.possession_time !== null
-  );
+  const pbkRows = clean.filter(r => r.possession_time !== null);
 
-  const otherRows = clean.filter(
-    r => r.possession_time === null && r.transition_screen === null
-  );
+  const otherRows = clean.filter(r => r.possession_time === null && r.transition_screen === null);
 
-  const transitionGroups = allGroups.filter(g =>
-    g.rows.some(r => r.transition_screen === "TRANSICIÓN")
-  );
+  const transitionGroups = allGroups.filter(g => g.rows.some(r => r.transition_screen === "TRANSICIÓN"));
 
-  const setGroups = allGroups.filter(g =>
-    g.rows.some(r => r.transition_screen === "ESTÁTICO")
-  );
+  const setGroups = allGroups.filter(g => g.rows.some(r => r.transition_screen === "ESTÁTICO"));
 
-  const pbkGroups = allGroups.filter(g =>
-    g.rows.some(r => r.possession_time != null)
-  );
+  const pbkGroups = allGroups.filter(g => g.rows.some(r => r.possession_time != null));
 
   const otherGroups = allGroups.filter(g =>
-    g.rows.some(r =>
-        r.possession_time == null &&
-        r.transition_screen == null
-    )
+    g.rows.some(r => r.possession_time == null && r.transition_screen == null)
   );
 
   document.getElementById("transitionCount").innerText = `(${transitionRows.length})`;
@@ -739,7 +671,7 @@ document.getElementById("drbDetail").textContent =
 
   renderRanking(allGroups, overallStats, colorScale, "globalRanking", "rankingStats");
 
-  if(selectedRanking){
+  if(selectedRanking && !isDefense){
 
     const selectedGroup = allGroups.find(g => g.name.split("|||")[0] === selectedRanking);
 
@@ -752,7 +684,19 @@ document.getElementById("drbDetail").textContent =
 
       renderPlayerRanking(playerRows, focusRows, overallStats);
     }
-  }else{
+  } else if (selectedRanking && isDefense) {
+    const selectedGroup = allGroups.find(g => g.name.split("|||")[0] === selectedRanking);
+
+    if(selectedGroup){
+
+      const focusRows = selectedGroup.rows;
+      const nextActionGroups = buildNextActionGroups(focusRows);
+
+      const nextActionRows = nextActionGroups.map(p => ({name: p.name, n: p.n, vg: p.vg, ts: p.ts, ppt: p.ppt, tov: p.tov, rows: p.rows}));
+
+      renderPlayerRanking(nextActionRows, focusRows, overallStats);
+    }
+  } else {
     renderFocusRanking(allGroups, overallStats);
   }
   document.getElementById("status").innerText = `OK - ${data.length} registres`;
@@ -801,100 +745,85 @@ function renderPlayerRanking(rows, focusRows, overallStats){
 
       });
 
-      return `<div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:white;">
-        <div style="font-weight:bold; font-size:16px;">
-          ${metric.title}
-        </div>
+      return `
+        <div style="border:1px solid #ddd; border-radius:8px; padding:12px; background:white;">
+          <div style="font-weight:bold; font-size:16px;">
+            ${metric.title}
+          </div>
 
-        <!-- 🔥 AQUI CANVIA: stats del focus -->
-        <div style="font-size:30px; font-weight:bold; margin-top:4px; display:flex; align-items:center; gap:8px;">
+          <div style="font-size:30px; font-weight:bold; margin-top:4px; display:flex; align-items:center; gap:8px;">
 
-  <span>
-    ${metric.format(focusStats[metric.key])}
-  </span>
+            <span>
+              ${metric.format(focusStats[metric.key])}
+            </span>
 
-  ${(() => {
+            ${(() => {
 
-    const value = focusStats[metric.key];
-    const ref = overallStats[metric.key];
+              const value = focusStats[metric.key];
+              const ref = overallStats[metric.key];
 
-    const delta = value - ref;
+              const delta = value - ref;
 
-    let color;
-          if (metric.key === "tov") {
-            color = isDefense
-              ? (delta < 0 ? "#d32f2f" : (delta > 0 ? "#2e7d32" : "#999"))
-              : (delta < 0 ? "#2e7d32" : (delta > 0 ? "#d32f2f" : "#999"));
-          } else {
-            color = isDefense
-              ? (delta > 0 ? "#d32f2f" : (delta < 0 ? "#2e7d32" : "#999"))
-              : (delta > 0 ? "#2e7d32" : (delta < 0 ? "#d32f2f" : "#999"));
-          }
+              let color;
+              if (metric.key === "tov") {
+                color = isDefense
+                  ? (delta < 0 ? "#d32f2f" : (delta > 0 ? "#2e7d32" : "#999"))
+                  : (delta < 0 ? "#2e7d32" : (delta > 0 ? "#d32f2f" : "#999"));
+              } else {
+                color = isDefense
+                  ? (delta > 0 ? "#d32f2f" : (delta < 0 ? "#2e7d32" : "#999"))
+                  : (delta > 0 ? "#2e7d32" : (delta < 0 ? "#d32f2f" : "#999"));
+              }
 
-    return `<span style="
-      display:inline-block;
-      width:12px;
-      height:12px;
-      border-radius:50%;
-      background:${color};
-      margin-left:6px;
-    "></span>`;
+              return `<span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:${color}; margin-left:6px;"></span>`;
+            })()}
+          </div>
 
-  })()}
+          ${sorted.map((r,index) => {
 
-</div>
+            const selected = selectedRanking === r.name;
 
-        ${sorted.map((r,index) => {
+            const playerStats = calcStats(rows);
+            const delta = r[metric.key] - focusStats[metric.key];
 
-          const selected = selectedRanking === r.name;
+            let color;
+            if (metric.key === "tov") {
+              color = isDefense
+                ? (delta < 0 ? "#d93025" : (delta > 0 ? "#1b8f3c" : "#666"))
+                : (delta < 0 ? "#1b8f3c" : (delta > 0 ? "#d93025" : "#666"));
+            } else {
+              color = isDefense
+                ? (delta > 0 ? "#d93025" : (delta < 0 ? "#1b8f3c" : "#666"))
+                : (delta > 0 ? "#1b8f3c" : (delta < 0 ? "#d93025" : "#666"));
+            }
 
-          // 🔥 comparació contra players (correcte)
-          const playerStats = calcStats(rows);
-          const delta = r[metric.key] - focusStats[metric.key];
+            let fontSize = "13px";
+            if(index === 0) fontSize = "16px";
+            else if(index === 1) fontSize = "15px";
+            else if(index === 2) fontSize = "14px";
 
-          let color;
-          if (metric.key === "tov") {
-            color = isDefense
-              ? (delta < 0 ? "#d93025" : (delta > 0 ? "#1b8f3c" : "#666"))
-              : (delta < 0 ? "#1b8f3c" : (delta > 0 ? "#d93025" : "#666"));
-          } else {
-            color = isDefense
-              ? (delta > 0 ? "#d93025" : (delta < 0 ? "#1b8f3c" : "#666"))
-              : (delta > 0 ? "#1b8f3c" : (delta < 0 ? "#d93025" : "#666"));
-          }
+            return `
+              <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #eee; padding:8px 0; cursor:pointer; background:${selected ? "#eaf3ff" : "transparent"};">
 
-          let fontSize = "13px";
-          if(index === 0) fontSize = "16px";
-          else if(index === 1) fontSize = "15px";
-          else if(index === 2) fontSize = "14px";
-
-          return `<div 
-            style="display:flex; justify-content:space-between; align-items:center;
-            border-top:1px solid #eee; padding:8px 0; cursor:pointer;
-            background:${selected ? "#eaf3ff" : "transparent"};">
-
-            <div>
-              <div style="font-size:${fontSize}; font-weight:${selected ? "700" : "500"};">
-                ${r.name}
+              <div>
+                <div style="font-size:${fontSize}; font-weight:${selected ? "700" : "500"};">
+                  ${r.name}
+                </div>
+                <div style="font-size:11px; color:#777;">
+                  ${r.n} ${r.n === 1 ? "acción" : "acciones"}
+                </div>
               </div>
-              <div style="font-size:11px; color:#777;">
-                ${r.n} ${r.n === 1 ? "acción" : "acciones"}
-              </div>
-            </div>
 
-            <div style="text-align:right;">
-              <div style="font-weight:bold; color:${color};">
-                ${metric.format(r[metric.key])}
+              <div style="text-align:right;">
+                <div style="font-weight:bold; color:${color};">
+                  ${metric.format(r[metric.key])}
+                </div>
               </div>
-            </div>
 
+            </div>`;
+          }).join("")}
           </div>`;
-        }).join("")}
-
-      </div>`;
-
-    }).join("");
-
+        }).join("");
 }
 
 
@@ -1552,6 +1481,43 @@ function buildPlayerGroups(rows){
     });
 }
 
+
+
+
+
+function buildNextActionGroups(rows){
+    const groups = {};
+
+    rows.forEach(r=>{
+
+        let key;
+
+        if(r.action_after_pick){
+            key = `${r.action_after_pick}`;
+        } else {
+            key = `Datos de equipo`;
+        }
+
+        if(!groups[key]){
+            groups[key] = {
+                name:key,
+                rows:[]
+            };
+        }
+
+        groups[key].rows.push(r);
+    });
+
+    return Object.values(groups).map(g=>{
+        const s = calcStats(g.rows);
+
+        return {
+            ...g,
+            ...s
+        };
+    });
+}
+
 window.selectRankingItem = function(raw){
     const name = raw.split("|||")[0];
 
@@ -1567,14 +1533,11 @@ window.selectRankingItem = function(raw){
 
 window.highlightFocus = function(focus){
 
-    console.time("highlight");
-
     selectedFocus = focus;
 
     document.querySelectorAll(".focus-row").forEach(row=>{
         row.classList.toggle("selected", row.dataset.focus === focus);
     });
-    console.timeEnd("highlight");
 
 }
 /* ---------------------------
